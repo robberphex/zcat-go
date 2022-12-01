@@ -22,7 +22,8 @@ Options:
 1. list file
 
 ```shell
-$ ./target/debug/zcat -l http://arms-apm-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/ms/AliyunJavaAgent.zip
+$ ./target/debug/zcat -l \
+  http://arms-apm-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/ms/AliyunJavaAgent.zip
  Length       Date    Time    Name
 ---------  ---------- -----   ----
         0  2022-11-15 10:17   AliyunJavaAgent/
@@ -35,6 +36,8 @@ $ ./target/debug/zcat -l http://arms-apm-cn-hangzhou.oss-cn-hangzhou.aliyuncs.co
 2. cat file from zip file url
 
 ```shell
-$ ./target/debug/zcat http://arms-apm-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/ms/AliyunJavaAgent.zip AliyunJavaAgent/version
+$ ./target/debug/zcat \
+  http://arms-apm-cn-hangzhou.oss-cn-hangzhou.aliyuncs.com/ms/AliyunJavaAgent.zip \
+  AliyunJavaAgent/version
 20221115101704_55a55f5_2.8.0
 ```
