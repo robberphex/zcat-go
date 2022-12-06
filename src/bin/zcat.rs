@@ -2,9 +2,11 @@ use std::{
     cmp::min,
     collections::HashMap,
     io::{Read, Seek, SeekFrom},
+    time::Duration,
 };
 
 use clap::Parser;
+use reqwest::blocking::{Client, RequestBuilder};
 use tracing::{debug, Level};
 use tracing_subscriber::FmtSubscriber;
 
@@ -50,15 +52,21 @@ struct HttpReader {
     total_len: Option<usize>,
     cur_pos: usize,
     buffer: HashMap<usize, Vec<u8>>,
+    client: Client,
 }
 
 impl HttpReader {
     pub fn new(url: String) -> HttpReader {
+        let client = reqwest::blocking::Client::builder()
+            .timeout(Duration::from_secs(10 * 60))
+            .build()
+            .unwrap();
         HttpReader {
             url: url,
             total_len: None,
             cur_pos: 0,
             buffer: HashMap::new(),
+            client: client,
         }
     }
 
@@ -66,7 +74,8 @@ impl HttpReader {
         let range_start = cache_index;
         let mut range_end = range_start + 512 - 1;
         range_end = min(range_end, self.total_len.unwrap() - 1);
-        let response = reqwest::blocking::Client::new()
+        let response = self
+            .client
             .get(self.url.clone())
             .header("Range", format!("bytes={}-{}", range_start, range_end))
             .send();
