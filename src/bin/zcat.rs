@@ -6,7 +6,7 @@ use std::{
 };
 
 use clap::Parser;
-use reqwest::blocking::{Client, RequestBuilder};
+use reqwest::blocking::Client;
 use tracing::{debug, Level};
 use tracing_subscriber::FmtSubscriber;
 
@@ -37,11 +37,11 @@ fn main() {
     let cli = Cli::parse();
     debug!("cli: {:?}", cli);
     if cli.list {
-        let mut read = HttpReader::new(String::from(cli.zip_file));
-        list_zip_contents(read);
+        let read = HttpReader::new(String::from(cli.zip_file));
+        list_zip_contents(read).unwrap();
         return;
     } else {
-        let mut read = HttpReader::new(String::from(cli.zip_file));
+        let read = HttpReader::new(String::from(cli.zip_file));
         cat_zip_file(read, cli.file_list);
         return;
     }
@@ -165,7 +165,7 @@ fn list_zip_contents(reader: impl Read + Seek) -> zip::result::ZipResult<()> {
     let mut total_len = 0;
     let mut total_cnt = 0;
     for i in 0..zip.len() {
-        let mut file = zip.by_index(i)?;
+        let file = zip.by_index(i)?;
 
         println!(
             "{: >9}  {:0>4}-{:0>2}-{:0>2} {:0>2}:{:0>2}   {:}",
