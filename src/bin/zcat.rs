@@ -1,6 +1,7 @@
 use std::{
     cmp::min,
     collections::HashMap,
+    env,
     io::{Read, Seek, SeekFrom},
     time::Duration,
 };
@@ -57,7 +58,22 @@ struct HttpReader {
 
 impl HttpReader {
     pub fn new(url: String) -> HttpReader {
-        let client = reqwest::blocking::Client::builder()
+        let mut builder = reqwest::blocking::Client::builder();
+
+        if let Ok(val) = env::var("http_proxy") {
+            match reqwest::Proxy::http(&val) {
+                Ok(proxy) => builder = builder.proxy(proxy),
+                Err(e) => eprintln!("cannot build proxy from {}: {}, ignore", val, e),
+            }
+        }
+        if let Ok(val) = env::var("https_proxy") {
+            match reqwest::Proxy::https(&val) {
+                Ok(proxy) => builder = builder.proxy(proxy),
+                Err(e) => eprintln!("cannot build proxy from {}: {}, ignore", val, e),
+            }
+        }
+
+        let client = builder
             .timeout(Duration::from_secs(10 * 60))
             .build()
             .unwrap();
