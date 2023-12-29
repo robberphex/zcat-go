@@ -120,12 +120,17 @@ func list_zip_contents(r *zip.Reader) error {
 }
 
 func cat_zip_file(r *zip.Reader, file_list []string) error {
-	fileSet := make(map[string]bool)
+	fileSet := make(map[string]*zip.File)
 	for _, name := range file_list {
-		fileSet[name] = true
+		fileSet[name] = nil
 	}
 	for _, f := range r.File {
-		if v, ok := fileSet[f.Name]; v && ok {
+		if _, ok := fileSet[f.Name]; ok {
+			fileSet[f.Name] = f
+		}
+	}
+	for _, file_name := range file_list {
+		if f, ok := fileSet[file_name]; ok {
 			rc, err := f.Open()
 			if err != nil {
 				return err
