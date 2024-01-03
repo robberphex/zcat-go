@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	bufra "github.com/avvmoto/buf-readerat"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/snabb/httpreaderat"
 	"github.com/spf13/cobra"
 )
@@ -63,12 +65,18 @@ func openLocalFile(path string) (io.ReaderAt, *int64, error) {
 }
 
 func openRemoteFile(url string) (io.ReaderAt, *int64, error) {
+	retryClient := retryablehttp.NewClient()
+	retryClient.Logger = nil
+	retryClient.HTTPClient.Timeout = 7 * time.Second
+	retryClient.RetryMax = 5
+	standardClient := retryClient.StandardClient()
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	htrdr, err := httpreaderat.New(nil, req, nil)
+	htrdr, err := httpreaderat.New(standardClient, req, nil)
 	if err != nil {
 		return nil, nil, err
 	}
